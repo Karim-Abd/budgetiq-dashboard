@@ -1,4 +1,4 @@
-import type { Applicant } from "@/components/content/applicants-panel";
+import type { Applicant } from "@/components/applicants/applicants-panel";
 
 // Human labels for the vision-answer keys stored in content_onboarding.vision_answers.
 // These mirror budgetiq/lib/onboarding-questions.ts on the website — the ids are

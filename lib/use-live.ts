@@ -4,26 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
-// Tables the read-side (dashboards, charts, stat tiles) aggregates from.
+// The three tables the OS reads. Each one is written by the public website and
+// reviewed here: waitlist signups, support tickets, content-team applications.
 export const LIVE_TABLES = [
-  "app_users",
-  "metrics_daily",
-  "kpi_weekly",
-  "financial_snapshots",
-  "subscriptions",
-  "revenue",
-  "expenses",
-  "posts",
-  "hooks",
-  "feedback",
-  "bugs",
-  "dev_tasks",
-  "features",
-  "tools",
-  "onboarding_steps",
-  "alerts",
-  "video_reviews",
   "waitlist",
+  "support_tickets",
   "content_onboarding",
 ] as const;
 

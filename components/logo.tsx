@@ -1,13 +1,16 @@
 import Image from "next/image";
 
 import { cn } from "@/lib/utils";
+import { apiPath } from "@/lib/base-path";
 
 // The BudgetIQ W mark (transparent PNG in /public). unoptimized keeps it a plain
-// asset request so it proxies cleanly under the /dashboard base path.
+// asset request so it proxies cleanly under the /dashboard base path — but it
+// also opts out of next/image's automatic basePath prefixing, so the src has to
+// carry /dashboard itself or it 404s.
 export function LogoMark({ className }: { className?: string }) {
   return (
     <Image
-      src="/logo.png"
+      src={apiPath("/logo.png")}
       alt="BudgetIQ"
       width={36}
       height={36}

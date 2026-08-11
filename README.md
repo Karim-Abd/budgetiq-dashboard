@@ -1,21 +1,18 @@
 # BudgetIQ OS
 
-The internal operating system for running BudgetIQ — a command center that sits
-above four operational components: **Content & Marketing**, **Financial**,
-**Development**, and **Operations**.
+The internal review desk for BudgetIQ. It shows the three things the public
+website collects: **Waitlist** signups, **Customer Support** tickets, and
+**Onboarding Answers** from content-team applicants.
 
 Built as a dark-only, green/blue command center. The signature treatment is an
 **instrument-cluster** readout — every metric, label and eyebrow is set in
-Geist Mono, with count-up numerals, micro-sparklines and week-over-week delta
-chips.
+Geist Mono.
 
 ## Stack
 
 - **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** + **shadcn/ui** (new-york) + **Magic UI** (animated components)
-- **Recharts** for charts (green/blue duotone)
+- **Tailwind CSS** + **shadcn/ui** (new-york)
 - **Supabase** (PostgreSQL + Auth)
-- **Zustand** for the global date-range filter, **dnd-kit** for the sprint board
 
 ## Getting started
 
@@ -34,9 +31,13 @@ do the 3-step Supabase setup below.
 2. **Add keys** — copy `.env.local.example` to `.env.local` and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API)
    - `SUPABASE_SERVICE_ROLE_KEY` (same page — **server-only**, never exposed to the browser; required for the admin team portal)
-3. **Run the schema** — paste [`supabase/schema.sql`](supabase/schema.sql) into the
-   Supabase SQL editor and run it (or `supabase db push`). It creates every table,
-   RLS policies, triggers, and the `v_active_mrr` / `v_pnl_monthly` views.
+3. **Run the SQL** in the Supabase SQL editor (or `supabase db push`), in this order:
+   - [`supabase/schema.sql`](supabase/schema.sql) — the `set_updated_at` helper, `profiles`, RLS, and the new-user trigger. Must run first.
+   - [`supabase/waitlist.sql`](supabase/waitlist.sql)
+   - [`supabase/support_tickets.sql`](supabase/support_tickets.sql)
+   - [`supabase/content_onboarding.sql`](supabase/content_onboarding.sql)
+
+   All four are idempotent, so re-running them is safe.
 
 Restart `npm run dev`. Now the app is gated by login.
 
@@ -49,33 +50,49 @@ Restart `npm run dev`. Now the app is gated by login.
   set a temporary password, and remove accounts. Account creation runs through a
   server route using the service-role key (`/api/admin/users`).
 
-## Filling in data
+## Where the data comes from
 
-Every section's data is entered by hand. Each component page has editable tables
-(`CrudTable`) with add / edit / delete — posts, hooks, avatars, video reviews,
-competitors, revenue, expenses, subscriptions, monthly snapshots, tasks,
-features, bugs, feedback, tools, onboarding steps, and alerts. With Supabase
-connected, every change persists (and respects RLS); without it, changes are
-local to your session and flagged with a toast.
+All three tables are written by the public marketing site, which inserts with
+the service-role key (bypassing RLS). The OS reads and edits them with your
+authenticated session:
+
+| Section | Table | Written by |
+| --- | --- | --- |
+| Waitlist | `waitlist` | the Join the Waitlist popup |
+| Customer Support | `support_tickets` | the `/support` form |
+| Onboarding Answers | `content_onboarding` | the hidden `/onboarding` page |
+
+You can also add or edit rows by hand in any section. With Supabase connected
+every change persists; without it, changes are local to your session and flagged
+with a toast.
 
 ## Routes
 
 | Route | What it is |
 | --- | --- |
-| `/dashboard` | Command center — user + financial KPIs, alerts feed, hero |
-| `/content` | CMS, avatars, hook library, AI video review, ConnectScraper, weekly report |
-| `/financial` | Revenue, costs, P&L + runway, SaaS metrics, billing |
-| `/development` | Sprint kanban (drag & drop), Notion migration, backlog, bugs |
-| `/operations` | Feedback pipeline, operational KPIs, tool stack, onboarding funnel |
-| `/settings/integrations` | Connector shells (Meta, Stripe, Notion, PostHog, Slack) |
+| `/` | Waitlist — signups, with totals for the last 7 and 30 days |
+| `/support` | Customer Support — ticket queue with status and priority |
+| `/applicants` | Onboarding Answers — expandable applications with the long-form answers |
+| `/settings/team` | Team accounts (owner/admin only) |
+| `/login`, `/setup` | Sign in, and first-owner creation |
 
 ## Structure
 
 ```
-app/(app)/            route group with the sidebar + topbar shell
-components/ui/         shadcn primitives + adapted Magic UI components
-components/{area}/     per-component panels (content, financial, development, …)
-components/charts/     recharts wrappers (trend, donut, sparkline, tooltip)
-lib/                   mock data, formatters, supabase clients, nav, store
-supabase/schema.sql    full PostgreSQL schema
+app/(app)/                route group with the sidebar + topbar shell
+components/ui/            shadcn primitives
+components/data/          CrudTable — the config-driven editable table
+components/applicants/    the onboarding review queue
+components/shared/        page header, stat tile, delta chip
+lib/entities.ts           field schemas for the editable tables
+lib/use-live.ts           reads the three tables
+lib/compute.ts            zero-safe stats for the tiles
+supabase/                 schema + one migration per table
 ```
+
+## Deployment
+
+The OS deploys as its own Vercel project with `basePath: "/dashboard"`, and the
+marketing site proxies `/dashboard/*` to it — so it is served at
+**budgetiq.org/dashboard**. Because of the basePath, any raw `fetch` or
+`window.location` must go through `apiPath()` from `lib/base-path.ts`.

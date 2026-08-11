@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { Trend } from "@/lib/mock-data";
-import { DeltaChip } from "@/components/shared/delta-chip";
+import { DeltaChip, type Trend } from "@/components/shared/delta-chip";
 import type { LucideIcon } from "lucide-react";
 
 interface StatTileProps {

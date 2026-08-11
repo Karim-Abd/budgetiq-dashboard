@@ -1,7 +1,9 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { Trend } from "@/lib/mock-data";
+
+/** semantic direction of a change, independent of its sign */
+export type Trend = "up" | "down" | "neutral";
 
 interface DeltaChipProps {
   delta: number;

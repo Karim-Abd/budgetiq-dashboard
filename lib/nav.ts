@@ -1,9 +1,7 @@
 import {
-  LayoutDashboard,
-  Megaphone,
-  Wallet,
-  Code2,
-  Settings2,
+  UserPlus,
+  LifeBuoy,
+  ClipboardList,
   type LucideIcon,
 } from "lucide-react";
 
@@ -16,51 +14,27 @@ export interface NavItem {
   accent: "info" | "growth";
 }
 
+// Three sections, each backed by one table the public website writes into.
 export const navItems: NavItem[] = [
   {
-    label: "Main Dashboard",
+    label: "Waitlist",
     href: "/",
-    icon: LayoutDashboard,
-    description: "Command center",
-    accent: "info",
-  },
-  {
-    label: "Content & Marketing",
-    href: "/content",
-    icon: Megaphone,
-    description: "CMS, hooks, avatars",
-    accent: "info",
-  },
-  {
-    label: "Financial",
-    href: "/financial",
-    icon: Wallet,
-    description: "Revenue, costs, P&L",
+    icon: UserPlus,
+    description: "Email signups",
     accent: "growth",
   },
   {
-    label: "Development",
-    href: "/development",
-    icon: Code2,
-    description: "Backlog, bugs, sprint",
+    label: "Customer Support",
+    href: "/support",
+    icon: LifeBuoy,
+    description: "Tickets from the website",
     accent: "info",
   },
   {
-    label: "Operations",
-    href: "/operations",
-    icon: Settings2,
-    description: "Feedback, KPIs, tools",
+    label: "Onboarding Answers",
+    href: "/applicants",
+    icon: ClipboardList,
+    description: "Content team applications",
     accent: "info",
   },
 ];
-
-export const dateRanges = [
-  "Today",
-  "Last 7 days",
-  "Last 30 days",
-  "Last 90 days",
-  "Quarter to date",
-  "Year to date",
-] as const;
-
-export type DateRange = (typeof dateRanges)[number];

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { ShieldAlert, TriangleAlert } from "lucide-react";
 
 import { getUser, getProfile, isAdminRole } from "@/lib/auth";
@@ -18,8 +17,9 @@ export default async function TeamPage() {
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           Account creation needs a Supabase project. Add your keys to{" "}
-          <code className="font-mono text-xs">.env.local</code> and run the schema —
-          see the <Link href="/settings/integrations" className="text-info underline-offset-2 hover:underline">README setup</Link> — then this becomes the admin portal where you create and manage team logins.
+          <code className="font-mono text-xs">.env.local</code> and run the schema in{" "}
+          <code className="font-mono text-xs">supabase/</code> — see the README setup —
+          then this becomes the admin portal where you create and manage team logins.
         </p>
       </div>
     );

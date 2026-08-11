@@ -2,7 +2,7 @@
 -- BudgetIQ OS — Support Tickets (incremental migration)
 -- ----------------------------------------------------------------------------
 -- Customer support tickets filed from the public website (budgetiq /support)
--- land here and surface in Operations → Support. Inserts come from the website
+-- land here and surface in the Customer Support section. Inserts come from the website
 -- server (service-role key, bypassing RLS); the team reads/updates them with
 -- their authenticated session.
 --
