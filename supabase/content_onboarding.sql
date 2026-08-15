@@ -59,6 +59,38 @@ create index if not exists content_onboarding_status_idx
 create index if not exists content_onboarding_email_idx
   on public.content_onboarding (email);
 
+-- ----------------------------------------------------------------------------
+-- Signing evidence, added alongside signed PDF copies of the agreement.
+-- Separate from the create above so existing databases pick it up on re-run.
+--
+-- agreement_hash is sha256 of the agreement text as it stood when they signed.
+-- It is what stops a later reword from silently changing what someone agreed
+-- to. Null means they signed while the text was still empty, i.e. the "coming
+-- by email" fallback, where there were no terms on screen to accept.
+-- ----------------------------------------------------------------------------
+alter table public.content_onboarding
+  add column if not exists agreement_version   text,
+  add column if not exists agreement_hash      text,
+  add column if not exists signer_ip           text,
+  add column if not exists signer_user_agent   text;
+
+-- ----------------------------------------------------------------------------
+-- Part B of the agreement's execution pages, which identifies the creator by an
+-- identification / passport / tax number. Captured at signing and written onto
+-- the signed PDF.
+--
+-- Account details for payment are deliberately NOT stored here. Clause 5.3 only
+-- requires the creator to supply them, not to supply them at signing, so they
+-- are collected when someone is actually being paid.
+--
+-- This is the most sensitive column in the database. Anyone with a team login
+-- can read it under the "team_all" policy below, so keep team accounts to
+-- people who need them, and prefer the signed PDF over pasting the value into
+-- email or chat.
+-- ----------------------------------------------------------------------------
+alter table public.content_onboarding
+  add column if not exists creator_id_number   text;
+
 -- RLS: team members (authenticated) get full read/write, same baseline as every
 -- other table. Public inserts do NOT go through here — they use the service-role
 -- key on the website server, which bypasses RLS.
