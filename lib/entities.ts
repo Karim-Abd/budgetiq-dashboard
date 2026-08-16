@@ -36,9 +36,11 @@ export const supportTicketsEntity: EntityConfig = {
     { key: "message", label: "Message", type: "textarea", required: true },
     { key: "priority", label: "Priority", type: "select", options: ["low", "medium", "high", "urgent"], badgeMap: { low: "muted", medium: "info", high: "critical", urgent: "critical" } },
     { key: "status", label: "Status", type: "select", options: ["new", "in_progress", "waiting", "resolved", "closed"], optionLabels: { new: "New", in_progress: "In Progress", waiting: "Waiting", resolved: "Resolved", closed: "Closed" }, badgeMap: { new: "info", in_progress: "secondary", waiting: "muted", resolved: "growth", closed: "muted" } },
+    // Stamped by Postgres on insert, so it is shown but never written back.
+    { key: "created_at", label: "Received", type: "datetime", readOnly: true },
   ],
   mock: [
-    { id: "st1", name: "Noah Kim", email: "noah.kim@uni.edu", type: "billing", subject: "Charged twice for Pro", message: "I was billed $9.99 twice on the same day — can you refund the duplicate?", priority: "high", status: "new" },
-    { id: "st2", name: "Mia Patel", email: "mia.patel@uni.edu", type: "bug", subject: "Bank sync stuck", message: "Connecting my bank spins forever on the last step.", priority: "medium", status: "in_progress" },
+    { id: "st1", name: "Noah Kim", email: "noah.kim@uni.edu", type: "billing", subject: "Charged twice for Pro", message: "I was billed $9.99 twice on the same day — can you refund the duplicate?", priority: "high", status: "new", created_at: "2026-08-16T09:12:00Z" },
+    { id: "st2", name: "Mia Patel", email: "mia.patel@uni.edu", type: "bug", subject: "Bank sync stuck", message: "Connecting my bank spins forever on the last step.", priority: "medium", status: "in_progress", created_at: "2026-08-14T16:38:00Z" },
   ],
 };

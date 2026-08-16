@@ -5,7 +5,13 @@ import { Plus, Pencil, Trash2, Loader2, Database } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useCrud, type CrudRow } from "@/lib/use-crud";
-import { formatCurrency, formatNumber, formatShortDate } from "@/lib/format";
+import {
+  formatCurrency,
+  formatDateTime,
+  formatNumber,
+  formatShortDate,
+  relativeTime,
+} from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +43,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export type FieldType = "text" | "textarea" | "number" | "currency" | "date" | "select" | "tags";
+export type FieldType =
+  | "text" | "textarea" | "number" | "currency" | "date" | "datetime" | "select" | "tags";
 export type BadgeVariant =
   | "default" | "secondary" | "outline" | "growth" | "info" | "critical" | "muted";
 
@@ -50,6 +57,13 @@ export interface FieldDef {
   required?: boolean;
   placeholder?: string;
   hideInTable?: boolean;
+  /**
+   * Shown in the table, kept out of the add/edit form and out of every write.
+   * For columns the database owns, like a `default now()` timestamp: without
+   * this, saving a status change would post the whole row back and stamp the
+   * received time with whatever was sitting in the input.
+   */
+  readOnly?: boolean;
   badgeMap?: Record<string, BadgeVariant>;
   defaultValue?: string | number;
 }
@@ -95,6 +109,9 @@ function CrudForm({
   const [values, setValues] = useState<Record<string, unknown>>(initial);
   const [busy, setBusy] = useState(false);
 
+  // Database-owned columns are displayed but never posted back.
+  const editable = fields.filter((f) => !f.readOnly);
+
   function set(key: string, value: unknown) {
     setValues((v) => ({ ...v, [key]: value }));
   }
@@ -102,7 +119,7 @@ function CrudForm({
   async function submit() {
     setBusy(true);
     const payload: Record<string, unknown> = {};
-    for (const f of fields) {
+    for (const f of editable) {
       const raw = values[f.key];
       if (f.type === "number" || f.type === "currency") payload[f.key] = Number(raw) || 0;
       else if (f.type === "tags")
@@ -117,10 +134,29 @@ function CrudForm({
     onClose();
   }
 
+  // Database-owned values, pinned above the scroll area so they stay visible
+  // while you work the row. Absent on a new row, which hasn't got one yet.
+  const meta = fields.filter((f) => f.readOnly && values[f.key]);
+
   return (
     <div className="grid gap-4 py-2">
+      {meta.length > 0 && (
+        <div className="flex flex-wrap gap-x-6 gap-y-1 rounded-lg border border-input bg-muted/30 px-3 py-2">
+          {meta.map((f) => (
+            <div key={f.key} className="flex items-baseline gap-2">
+              <span className="text-xs text-muted-foreground">{f.label}</span>
+              <span className="font-mono text-xs tabular-nums">
+                {f.type === "datetime"
+                  ? `${formatDateTime(String(values[f.key]))} · ${relativeTime(String(values[f.key]))}`
+                  : String(values[f.key])}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <div className="grid max-h-[60vh] gap-4 overflow-y-auto pr-1">
-        {fields.map((f) => {
+        {editable.map((f) => {
           const val = values[f.key];
           return (
             <div key={f.key} className="grid gap-1.5">
@@ -184,6 +220,18 @@ function renderCell(field: FieldDef, value: unknown) {
       return <span className="font-mono tabular-nums">{formatNumber(Number(value))}</span>;
     case "date":
       return <span className="font-mono text-xs text-muted-foreground">{formatShortDate(String(value))}</span>;
+    case "datetime": {
+      const d = new Date(String(value));
+      if (Number.isNaN(d.getTime())) return <span className="text-muted-foreground">—</span>;
+      // Absolute answers "when exactly", relative answers "is this going stale".
+      // A queue needs both, so the cell carries both.
+      return (
+        <div className="whitespace-nowrap font-mono text-xs leading-tight">
+          <div className="tabular-nums">{formatDateTime(d)}</div>
+          <div className="text-muted-foreground">{relativeTime(d)}</div>
+        </div>
+      );
+    }
     case "tags":
       return (
         <div className="flex flex-wrap gap-1">
@@ -199,7 +247,18 @@ function renderCell(field: FieldDef, value: unknown) {
   }
 }
 
-export function CrudTable<T extends CrudRow>({ config }: { config: EntityConfig<T> }) {
+export function CrudTable<T extends CrudRow>({
+  config,
+  rowActions,
+}: {
+  config: EntityConfig<T>;
+  /**
+   * Extra per-row controls, rendered to the left of edit and delete. Used by
+   * Customer Support for Reply, which is a table-specific action rather than
+   * something every entity has.
+   */
+  rowActions?: (row: T) => React.ReactNode;
+}) {
   const pk = config.pk ?? "id";
   const { rows, loading, create, update, remove } = useCrud<T>(config.table, {
     mock: config.mock,
@@ -246,7 +305,9 @@ export function CrudTable<T extends CrudRow>({ config }: { config: EntityConfig<
               {cols.map((f) => (
                 <TableHead key={f.key}>{f.label}</TableHead>
               ))}
-              <TableHead className="w-[80px] text-right">Actions</TableHead>
+              <TableHead className={cn("text-right", rowActions ? "w-[120px]" : "w-[80px]")}>
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -259,6 +320,7 @@ export function CrudTable<T extends CrudRow>({ config }: { config: EntityConfig<
                 ))}
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
+                    {rowActions?.(row)}
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditing(row)} aria-label="Edit">
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>

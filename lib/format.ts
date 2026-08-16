@@ -44,6 +44,23 @@ export function formatShortDate(input: string | Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/**
+ * Date and clock time, in the viewer's own timezone. Postgres hands back UTC
+ * timestamptz strings, so the conversion matters: a ticket filed at 23:40 in
+ * London is not the same day for the person reading it in New York.
+ */
+export function formatDateTime(input: string | Date): string {
+  const d = typeof input === "string" ? new Date(input) : input;
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
 export function daysUntil(input: string | Date): number {
   const d = typeof input === "string" ? new Date(input) : input;
   const ms = d.getTime() - Date.now();

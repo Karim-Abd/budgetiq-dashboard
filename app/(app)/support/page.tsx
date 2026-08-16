@@ -7,6 +7,7 @@ import { supportStats } from "@/lib/compute";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatTile } from "@/components/shared/stat-tile";
 import { CrudTable } from "@/components/data/crud-table";
+import { ReplyDialog } from "@/components/support/reply-dialog";
 import { supportTicketsEntity } from "@/lib/entities";
 
 export default function SupportPage() {
@@ -18,7 +19,7 @@ export default function SupportPage() {
       <PageHeader
         eyebrow="Section 02"
         title="Customer Support"
-        description="Tickets filed from the support form on budgetiq.org. Work a ticket by editing its status and priority — new, in progress, waiting, resolved, then closed."
+        description="Tickets filed from the support form on budgetiq.org. Reply straight from here and it emails the customer, or work a ticket by editing its status and priority — new, in progress, waiting, resolved, then closed."
       />
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -52,7 +53,20 @@ export default function SupportPage() {
         />
       </div>
 
-      <CrudTable config={supportTicketsEntity} />
+      <CrudTable
+        config={supportTicketsEntity}
+        rowActions={(row) => (
+          <ReplyDialog
+            ticket={{
+              id: String(row.id),
+              name: (row.name as string) ?? null,
+              email: String(row.email),
+              subject: (row.subject as string) ?? null,
+              message: String(row.message ?? ""),
+            }}
+          />
+        )}
+      />
     </div>
   );
 }
