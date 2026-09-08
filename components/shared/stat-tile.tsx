@@ -9,7 +9,7 @@ interface StatTileProps {
   icon?: LucideIcon;
   delta?: number;
   trend?: Trend;
-  accent?: "growth" | "info" | "muted";
+  accent?: "growth" | "info" | "muted" | "critical";
   className?: string;
 }
 
@@ -25,7 +25,13 @@ export function StatTile({
   className,
 }: StatTileProps) {
   const accentText =
-    accent === "growth" ? "text-growth" : accent === "info" ? "text-info" : "text-muted-foreground";
+    accent === "growth"
+      ? "text-growth"
+      : accent === "info"
+        ? "text-info"
+        : accent === "critical"
+          ? "text-critical"
+          : "text-muted-foreground";
   return (
     <div
       className={cn(

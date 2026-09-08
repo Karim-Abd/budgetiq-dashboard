@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Loader2, Database } from "lucide-react";
+import { Plus, Pencil, Trash2, Loader2, Database, TableProperties } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useCrud, type CrudRow } from "@/lib/use-crud";
@@ -65,7 +65,8 @@ export interface FieldDef {
    */
   readOnly?: boolean;
   badgeMap?: Record<string, BadgeVariant>;
-  defaultValue?: string | number;
+  /** A thunk is evaluated per new row, so a date field can default to today. */
+  defaultValue?: string | number | (() => string | number);
 }
 
 export interface EntityConfig<T extends CrudRow = CrudRow> {
@@ -78,19 +79,27 @@ export interface EntityConfig<T extends CrudRow = CrudRow> {
   ascending?: boolean;
   /** primary key column — defaults to "id" */
   pk?: string;
+  /**
+   * Restricts this table to one slice, and stamps the same values onto rows
+   * created here. Income and Expenses are two views of finance_transactions.
+   */
+  filter?: Record<string, string>;
   mock?: T[];
 }
 
 function emptyValues(fields: FieldDef[]): Record<string, unknown> {
   const v: Record<string, unknown> = {};
   for (const f of fields) {
-    v[f.key] =
-      f.defaultValue ??
-      (f.type === "number" || f.type === "currency"
+    const fallback =
+      f.type === "number" || f.type === "currency"
         ? 0
         : f.type === "select"
           ? f.options?.[0] ?? ""
-          : "");
+          : "";
+    v[f.key] =
+      typeof f.defaultValue === "function"
+        ? f.defaultValue()
+        : f.defaultValue ?? fallback;
   }
   return v;
 }
@@ -260,10 +269,11 @@ export function CrudTable<T extends CrudRow>({
   rowActions?: (row: T) => React.ReactNode;
 }) {
   const pk = config.pk ?? "id";
-  const { rows, loading, create, update, remove } = useCrud<T>(config.table, {
+  const { rows, loading, missing, create, update, remove } = useCrud<T>(config.table, {
     mock: config.mock,
     orderBy: config.orderBy,
     ascending: config.ascending,
+    filter: config.filter,
     pk,
   });
   const [addOpen, setAddOpen] = useState(false);
@@ -340,7 +350,15 @@ export function CrudTable<T extends CrudRow>({
             {!loading && rows.length === 0 && (
               <TableRow>
                 <TableCell colSpan={cols.length + 1} className="py-8 text-center text-sm text-muted-foreground">
-                  No {config.singular}s yet — add your first one.
+                  {missing ? (
+                    <span className="inline-flex items-center gap-2">
+                      <TableProperties className="h-4 w-4" />
+                      Table <code className="font-mono text-xs">{config.table}</code> doesn&apos;t exist yet — run{" "}
+                      <code className="font-mono text-xs">supabase/finance.sql</code> to create it.
+                    </span>
+                  ) : (
+                    <>No {config.singular}s yet — add your first one.</>
+                  )}
                 </TableCell>
               </TableRow>
             )}

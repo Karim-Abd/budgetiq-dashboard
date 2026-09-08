@@ -45,6 +45,14 @@
     --critical: 350 89% 60%;
     --critical-foreground: 210 40% 98%;
 
+    /* Chart marks for the Finance cash-flow pair. Deliberately NOT --growth /
+       --critical: those are tuned as *text* on dark and sit above the mark
+       lightness band, and red would read an expense as an error. This warm/cool
+       pair was validated for dark-surface contrast and colour-blind separation
+       (deutan ΔE 11.1) rather than picked by eye. */
+    --money-in: 158 64% 41%;
+    --money-out: 30 88% 46%;
+
     --radius: 0.75rem;
   }
 }

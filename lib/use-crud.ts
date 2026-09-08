@@ -9,12 +9,25 @@ export interface CrudRow {
   [key: string]: unknown;
 }
 
+/** Mock-mode equivalent of the `.match()` applied to the live query. */
+function matchesFilter<T extends CrudRow>(rows: T[], filter?: Record<string, string>): T[] {
+  if (!filter) return rows;
+  const pairs = Object.entries(filter);
+  return rows.filter((r) => pairs.every(([k, v]) => String(r[k]) === v));
+}
+
 interface UseCrudOptions<T> {
   mock?: T[];
   orderBy?: string;
   ascending?: boolean;
   /** primary key column — defaults to "id" (some metric tables key on a date) */
   pk?: string;
+  /**
+   * Column/value pairs this view is restricted to. Applied to the read, and
+   * stamped onto every row created here — so the Expenses tab can hold one
+   * slice of finance_transactions without the form asking which kind it is.
+   */
+  filter?: Record<string, string>;
 }
 
 /**
@@ -24,10 +37,17 @@ interface UseCrudOptions<T> {
  */
 export function useCrud<T extends CrudRow>(
   table: string,
-  { mock = [], orderBy = "created_at", ascending = false, pk = "id" }: UseCrudOptions<T> = {},
+  { mock = [], orderBy = "created_at", ascending = false, pk = "id", filter }: UseCrudOptions<T> = {},
 ) {
-  const [rows, setRows] = useState<T[]>(isSupabaseConfigured ? [] : mock);
+  // Serialised so the effect below compares by value — a fresh `{ kind: "income" }`
+  // object literal on every render would otherwise refetch forever.
+  const filterKey = JSON.stringify(filter ?? null);
+  const [rows, setRows] = useState<T[]>(() =>
+    isSupabaseConfigured ? [] : matchesFilter(mock, filter),
+  );
   const [loading, setLoading] = useState(isSupabaseConfigured);
+  /** the table doesn't exist yet — the section's migration hasn't been run */
+  const [missing, setMissing] = useState(false);
 
   const keyOf = (r: T) => String(r[pk]);
 
@@ -35,21 +55,31 @@ export function useCrud<T extends CrudRow>(
     if (!isSupabaseConfigured) return;
     setLoading(true);
     const supabase = createClient();
-    const { data, error } = await supabase
-      .from(table)
-      .select("*")
-      .order(orderBy, { ascending });
-    if (error) toast.error(`Couldn't load ${table}`, error.message);
-    else if (data) setRows(data as T[]);
+    const parsed = JSON.parse(filterKey) as Record<string, string> | null;
+    let query = supabase.from(table).select("*");
+    if (parsed) query = query.match(parsed);
+    const { data, error } = await query.order(orderBy, { ascending });
+    if (error) {
+      // A missing table is a setup step, not a failure worth a red toast — the
+      // table renders a "run the migration" notice instead.
+      if (error.code === "42P01") setMissing(true);
+      else toast.error(`Couldn't load ${table}`, error.message);
+    } else if (data) {
+      setMissing(false);
+      setRows(data as T[]);
+    }
     setLoading(false);
-  }, [table, orderBy, ascending]);
+  }, [table, orderBy, ascending, filterKey]);
 
   useEffect(() => {
     refetch();
   }, [refetch]);
 
   const create = useCallback(
-    async (row: Partial<T>) => {
+    async (input: Partial<T>) => {
+      // The view's filter is part of the row's identity, so it is stamped on
+      // rather than left to the form.
+      const row = { ...input, ...(JSON.parse(filterKey) ?? {}) } as Partial<T>;
       if (!isSupabaseConfigured) {
         const optimistic = { ...row, [pk]: `local-${Date.now()}` } as unknown as T;
         setRows((p) => [optimistic, ...p]);
@@ -70,7 +100,7 @@ export function useCrud<T extends CrudRow>(
       toast.success("Saved");
       return data as T;
     },
-    [table, pk],
+    [table, pk, filterKey],
   );
 
   const update = useCallback(
@@ -118,5 +148,5 @@ export function useCrud<T extends CrudRow>(
     [table, pk],
   );
 
-  return { rows, loading, configured: isSupabaseConfigured, refetch, create, update, remove };
+  return { rows, loading, missing, configured: isSupabaseConfigured, refetch, create, update, remove };
 }

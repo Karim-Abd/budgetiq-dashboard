@@ -30,8 +30,25 @@ export function formatDelta(value: number, decimals = 1): string {
   return `${sign}${value.toFixed(decimals)}%`;
 }
 
+/**
+ * Parse a value for *calendar* display.
+ *
+ * A bare `YYYY-MM-DD` (Postgres `date`) is read as LOCAL midnight, not UTC.
+ * `new Date("2026-10-01")` is UTC midnight, which renders as Sep 30 anywhere
+ * west of Greenwich — so a renewal or an expense would show the wrong day, and
+ * a first-of-the-month row would land in the wrong month. Full timestamps still
+ * go through the normal parse, where the UTC→local shift is what you want.
+ */
+function toCalendarDate(input: string | Date): Date {
+  if (typeof input !== "string") return input;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(input.trim());
+  if (!m) return new Date(input);
+  return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+}
+
 export function formatDate(input: string | Date): string {
-  const d = typeof input === "string" ? new Date(input) : input;
+  const d = toCalendarDate(input);
+  if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -40,7 +57,8 @@ export function formatDate(input: string | Date): string {
 }
 
 export function formatShortDate(input: string | Date): string {
-  const d = typeof input === "string" ? new Date(input) : input;
+  const d = toCalendarDate(input);
+  if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 

@@ -65,6 +65,9 @@ const config: Config = {
           DEFAULT: "hsl(var(--critical))",
           foreground: "hsl(var(--critical-foreground))",
         },
+        // Finance chart marks (see globals.css for why these aren't growth/critical)
+        "money-in": "hsl(var(--money-in))",
+        "money-out": "hsl(var(--money-out))",
       },
       borderRadius: {
         lg: "var(--radius)",

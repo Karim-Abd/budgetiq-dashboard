@@ -2,6 +2,7 @@ import {
   UserPlus,
   LifeBuoy,
   ClipboardList,
+  Wallet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,7 +15,8 @@ export interface NavItem {
   accent: "info" | "growth";
 }
 
-// Three sections, each backed by one table the public website writes into.
+// The first three sections are each backed by one table the public website
+// writes into; Finance is the exception — the team enters it here.
 export const navItems: NavItem[] = [
   {
     label: "Waitlist",
@@ -36,5 +38,12 @@ export const navItems: NavItem[] = [
     icon: ClipboardList,
     description: "Content team applications",
     accent: "info",
+  },
+  {
+    label: "Finance",
+    href: "/finance",
+    icon: Wallet,
+    description: "Income, expenses, subscriptions",
+    accent: "growth",
   },
 ];

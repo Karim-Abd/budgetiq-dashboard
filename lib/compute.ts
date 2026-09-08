@@ -2,6 +2,13 @@
 // renders. Everything tolerates empty input and returns zeros.
 
 import type { LiveData } from "@/lib/use-live";
+import {
+  currentMonthKey,
+  monthKey,
+  monthlyAmount,
+  previousMonthKey,
+  todayInputValue as currentDay,
+} from "@/lib/finance";
 
 const DAY_MS = 86_400_000;
 
@@ -75,5 +82,77 @@ export function applicantStats(data: LiveData) {
     shortlisted: countBy(rows, "status", "shortlisted"),
     onboarded: countBy(rows, "status", "onboarded"),
     last7: withinDays(rows, 7),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// FINANCE
+// ---------------------------------------------------------------------------
+
+const amountOf = (r: Record<string, unknown>) => {
+  const n = Number(r.amount);
+  return Number.isFinite(n) ? n : 0;
+};
+
+function sumMonth(
+  rows: Record<string, unknown>[],
+  kind: "income" | "expense",
+  month: string,
+) {
+  return rows
+    .filter((r) => r.kind === kind && monthKey(r.occurred_on) === month)
+    .reduce((t, r) => t + amountOf(r), 0);
+}
+
+/** Percent change, or null when there's no prior month to compare against. */
+function delta(current: number, previous: number): number | null {
+  if (previous <= 0) return null;
+  return ((current - previous) / previous) * 100;
+}
+
+export function financeStats(data: LiveData) {
+  const tx = data.finance_transactions;
+  const subs = data.finance_subscriptions;
+  const thisMonth = currentMonthKey();
+  const lastMonth = previousMonthKey();
+
+  const income = sumMonth(tx, "income", thisMonth);
+  const expense = sumMonth(tx, "expense", thisMonth);
+  const prevIncome = sumMonth(tx, "income", lastMonth);
+  const prevExpense = sumMonth(tx, "expense", lastMonth);
+
+  const active = subs.filter((s) => s.status === "active");
+  // Mixed billing cycles are only comparable once normalised to one month.
+  const runRate = active.reduce(
+    (t, s) => t + monthlyAmount(amountOf(s), String(s.cycle ?? "monthly")),
+    0,
+  );
+
+  // Soonest upcoming renewal among active subs. Dates are YYYY-MM-DD, which
+  // sorts correctly as plain strings — no parsing, no timezone to get wrong.
+  const today = currentDay();
+  const upcoming = active
+    .map((s) => String(s.next_charge ?? ""))
+    .filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= today)
+    .sort();
+
+  const allIncome = tx.filter((r) => r.kind === "income").reduce((t, r) => t + amountOf(r), 0);
+  const allExpense = tx.filter((r) => r.kind === "expense").reduce((t, r) => t + amountOf(r), 0);
+
+  return {
+    income,
+    expense,
+    net: income - expense,
+    incomeDelta: delta(income, prevIncome),
+    expenseDelta: delta(expense, prevExpense),
+    prevNet: prevIncome - prevExpense,
+    runRate,
+    nextRenewal: upcoming[0] ?? null,
+    activeSubs: active.length,
+    totalSubs: subs.length,
+    allIncome,
+    allExpense,
+    balance: allIncome - allExpense,
+    count: tx.length,
   };
 }
