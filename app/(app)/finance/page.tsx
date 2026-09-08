@@ -62,7 +62,7 @@ export default function FinancePage() {
       <PageHeader
         eyebrow="Section 04"
         title="Finance"
-        description="The books for BudgetIQ. Log what comes in, what goes out, and what renews on its own — then read the month back as cash flow, category spend, and a subscription run-rate."
+        description="The books for BudgetIQ. Log what comes in, what goes out, and what renews on its own, then read the month back as cash flow, category spend, and a subscription run-rate."
       />
 
       {needsMigration && (
@@ -245,7 +245,7 @@ export default function FinancePage() {
               value={formatCurrency(stats.runRate)}
               icon={Repeat}
               accent="info"
-              sub="every cycle normalised to a month"
+              sub="every cycle normalized to a month"
             />
             <StatTile
               label="Yearly"

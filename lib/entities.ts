@@ -141,7 +141,7 @@ export const financeSubscriptionsEntity: EntityConfig = {
   singular: "subscription",
   orderBy: "next_charge",
   ascending: true,
-  description: "recurring commitments, normalised to a monthly run-rate",
+  description: "recurring commitments, normalized to a monthly run-rate",
   fields: [
     { key: "name", label: "Name", type: "text", required: true, placeholder: "Vercel Pro" },
     { key: "vendor", label: "Vendor", type: "text", placeholder: "Vercel" },

@@ -353,7 +353,7 @@ export function CrudTable<T extends CrudRow>({
                   {missing ? (
                     <span className="inline-flex items-center gap-2">
                       <TableProperties className="h-4 w-4" />
-                      Table <code className="font-mono text-xs">{config.table}</code> doesn&apos;t exist yet — run{" "}
+                      Table <code className="font-mono text-xs">{config.table}</code> doesn&apos;t exist yet. Run{" "}
                       <code className="font-mono text-xs">supabase/finance.sql</code> to create it.
                     </span>
                   ) : (
