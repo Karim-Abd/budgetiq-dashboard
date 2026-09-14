@@ -2,7 +2,7 @@
   "name": "budgetiq-os",
   "version": "0.1.0",
   "private": true,
-  "description": "BudgetIQ internal operating system — waitlist, customer support, and content team applications.",
+  "description": "BudgetIQ internal operating system — customer support, content team applications, and finance.",
   "scripts": {
     "dev": "next dev -p 3002",
     "build": "next build",

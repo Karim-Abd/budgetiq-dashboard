@@ -14,24 +14,6 @@ import {
 // `mock` seeds (snake_case, with an id) keep the UI alive before Supabase is
 // connected; once it is, useCrud reads live rows instead.
 
-export const waitlistEntity: EntityConfig = {
-  table: "waitlist",
-  title: "Waitlist signups",
-  singular: "signup",
-  orderBy: "created_at",
-  description: "collected from the website's Join the Waitlist popup",
-  fields: [
-    { key: "email", label: "Email", type: "text", required: true, placeholder: "ava@uni.edu" },
-    { key: "source", label: "Source", type: "select", options: ["website", "referral", "manual", "other"], optionLabels: { website: "Website", referral: "Referral", manual: "Manual", other: "Other" }, badgeMap: { website: "info", referral: "growth", manual: "muted", other: "muted" } },
-    { key: "created_at", label: "Signed up", type: "date" },
-  ],
-  mock: [
-    { id: "wl1", email: "ava.chen@uni.edu", source: "website", created_at: "2026-07-08" },
-    { id: "wl2", email: "liam.ortiz@uni.edu", source: "website", created_at: "2026-07-07" },
-    { id: "wl3", email: "noah.kim@uni.edu", source: "referral", created_at: "2026-07-05" },
-  ],
-};
-
 export const supportTicketsEntity: EntityConfig = {
   table: "support_tickets",
   title: "Support tickets",

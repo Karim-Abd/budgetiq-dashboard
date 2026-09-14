@@ -26,29 +26,6 @@ function countBy(rows: Record<string, unknown>[], key: string, value: string) {
 }
 
 // ---------------------------------------------------------------------------
-// WAITLIST
-// ---------------------------------------------------------------------------
-export function waitlistStats(data: LiveData) {
-  const rows = data.waitlist;
-
-  // Most common source, so it's obvious where signups actually come from.
-  const bySource = new Map<string, number>();
-  for (const r of rows) {
-    const s = String(r.source ?? "unknown");
-    bySource.set(s, (bySource.get(s) ?? 0) + 1);
-  }
-  const top = Array.from(bySource.entries()).sort((a, b) => b[1] - a[1])[0];
-
-  return {
-    total: rows.length,
-    last7: withinDays(rows, 7),
-    last30: withinDays(rows, 30),
-    topSource: top?.[0] ?? "—",
-    topSourceCount: top?.[1] ?? 0,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // CUSTOMER SUPPORT
 // ---------------------------------------------------------------------------
 const OPEN_STATUSES = ["new", "in_progress", "waiting"];

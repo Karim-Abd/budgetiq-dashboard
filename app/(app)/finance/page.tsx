@@ -60,7 +60,7 @@ export default function FinancePage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Section 04"
+        eyebrow="Section 03"
         title="Finance"
         description="The books for BudgetIQ. Log what comes in, what goes out, and what renews on its own, then read the month back as cash flow, category spend, and a subscription run-rate."
       />

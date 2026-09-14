@@ -17,7 +17,7 @@ export default function SupportPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Section 02"
+        eyebrow="Section 01"
         title="Customer Support"
         description="Tickets filed from the support form on budgetiq.org. Reply straight from here and it emails the customer, or work a ticket by editing its status and priority — new, in progress, waiting, resolved, then closed."
       />

@@ -4,11 +4,10 @@ import { useCallback, useEffect, useState } from "react";
 
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
-// The tables the OS reads. The first three are written by the public website
-// and reviewed here (waitlist signups, support tickets, content-team
-// applications); the finance pair is entered by the team in the OS itself.
+// The tables the OS reads. The first two are written by the public website
+// and reviewed here (support tickets, content-team applications); the
+// finance pair is entered by the team in the OS itself.
 export const LIVE_TABLES = [
-  "waitlist",
   "support_tickets",
   "content_onboarding",
   "finance_transactions",

@@ -1,5 +1,4 @@
 import {
-  UserPlus,
   LifeBuoy,
   ClipboardList,
   Wallet,
@@ -15,16 +14,9 @@ export interface NavItem {
   accent: "info" | "growth";
 }
 
-// The first three sections are each backed by one table the public website
-// writes into; Finance is the exception — the team enters it here.
+// Support and Onboarding Answers are each backed by one table the public
+// website writes into; Finance is the exception — the team enters it here.
 export const navItems: NavItem[] = [
-  {
-    label: "Waitlist",
-    href: "/",
-    icon: UserPlus,
-    description: "Email signups",
-    accent: "growth",
-  },
   {
     label: "Customer Support",
     href: "/support",

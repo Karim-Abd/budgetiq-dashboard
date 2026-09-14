@@ -15,7 +15,7 @@ export default function ApplicantsPage() {
   return (
     <div className="animate-fade-up">
       <PageHeader
-        eyebrow="Section 03"
+        eyebrow="Section 02"
         title="Onboarding Answers"
         description="Content team applications submitted through the hidden /onboarding page. Expand a row to read the full long-form answers, then set a status and leave notes."
       />
