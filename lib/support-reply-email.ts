@@ -1,6 +1,6 @@
 import "server-only";
 
-import { esc, TEAM_INBOX, type Mail } from "@/lib/email";
+import { esc, SUPPORT_FROM, SUPPORT_INBOX, type Mail } from "@/lib/email";
 
 // The email a customer gets when someone answers their ticket from the OS.
 // Built to read like a person replying, not like a system notification: the
@@ -82,9 +82,10 @@ export function supportReplyEmail(c: ReplyContext): Mail {
   const subject = c.reference ? `Re: ${base} (${c.reference})` : `Re: ${base}`;
 
   return {
+    from: SUPPORT_FROM,
     to: c.customerEmail,
     subject,
     html,
-    replyTo: TEAM_INBOX,
+    replyTo: SUPPORT_INBOX,
   };
 }

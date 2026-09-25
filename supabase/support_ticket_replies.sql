@@ -6,7 +6,7 @@
 -- Resend accepts the send, so the thread is a record of what the customer
 -- received, not of what someone typed.
 --
--- Outbound only. Customer replies arrive as ordinary mail in info@budgetiq.org
+-- Outbound only. Customer replies arrive as ordinary mail in support@budgetiq.org
 -- and are not captured here; that would need an inbound mail webhook.
 --
 -- Run schema.sql and support_tickets.sql first. Everything here is idempotent,

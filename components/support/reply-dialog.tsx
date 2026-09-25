@@ -271,7 +271,7 @@ export function ReplyDialog({ ticket }: { ticket: ReplyTicket }) {
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={6}
-              placeholder="Write your reply. It goes straight to their inbox from info@budgetiq.org."
+              placeholder="Write your reply. It goes straight to their inbox from support@budgetiq.org."
               disabled={sending}
             />
             <p className="text-xs text-muted-foreground">

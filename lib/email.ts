@@ -17,10 +17,19 @@ export const isEmailConfigured = !!apiKey;
 /** Must be on a domain verified in Resend, or every send is rejected. */
 const FROM = process.env.EMAIL_FROM ?? "BudgetIQ <info@budgetiq.org>";
 
-/** Where customer replies come back to. */
+/** General inbox. */
 export const TEAM_INBOX = process.env.TEAM_INBOX ?? "info@budgetiq.org";
 
+/**
+ * Customer support has its own mailbox, matching the website: ticket replies go
+ * out from it and customers answer back to it.
+ */
+export const SUPPORT_FROM = process.env.SUPPORT_EMAIL_FROM ?? "BudgetIQ Support <support@budgetiq.org>";
+export const SUPPORT_INBOX = process.env.SUPPORT_INBOX ?? "support@budgetiq.org";
+
 export type Mail = {
+  /** Overrides the default sender. Must still be on the verified domain. */
+  from?: string;
   to: string;
   subject: string;
   html: string;
@@ -43,7 +52,7 @@ export async function sendEmail(mail: Mail): Promise<SendResult> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: FROM,
+        from: mail.from ?? FROM,
         to: [mail.to],
         subject: mail.subject,
         html: mail.html,
