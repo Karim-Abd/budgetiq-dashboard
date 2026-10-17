@@ -13,9 +13,47 @@ export const VISION_QUESTION_LABELS: Record<string, string> = {
   twelve_months: "Where do you want to be in 12 months, and how does this fit?",
 };
 
+// The website stores the brand question in vision_answers under these keys
+// (the vision step itself was cut in Oct 2026, which left that column free and
+// avoided a schema change). Must match budgetiq/app/api/content-onboarding.
+export const BRAND_KEYS = {
+  worked: "brands_worked_with",
+  details: "brands",
+} as const;
+
 // Seeds so the panel is reviewable before Supabase is connected — same role as
 // the `mock` arrays on every entity in lib/entities.ts.
 export const applicantMock: Applicant[] = [
+  {
+    // Shape of an applicant from the trimmed /onboarding (Oct 2026): no vision
+    // answers, brand question instead, retired fields left null.
+    id: "ca0",
+    full_name: "Maya Haddad",
+    email: "maya@example.com",
+    phone: "+961 70 123 456",
+    age: "21",
+    location: "Beirut, Lebanon",
+    occupation: null,
+    platforms: ["TikTok", "Instagram"],
+    handles: { tiktok: "mayasaves", instagram: "maya.hd" },
+    total_followers: 12400,
+    avg_views: 3500,
+    best_post_url: null,
+    best_post_why: null,
+    tools: [],
+    portfolio_url: null,
+    vision_answers: {
+      brands_worked_with: "Yes",
+      brands: "Anghami, 3 TikToks, 2023",
+    },
+    commitment: null,
+    hunger: null,
+    agreement_signature: "Maya Haddad",
+    agreement_accepted_at: "2026-10-17T12:00:00Z",
+    status: "new",
+    notes: null,
+    created_at: "2026-10-17T12:00:00Z",
+  },
   {
     id: "ca1",
     full_name: "Lara Haddad",
