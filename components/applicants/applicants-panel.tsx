@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCrud, type CrudRow } from "@/lib/use-crud";
 import { formatNumber, relativeTime } from "@/lib/format";
-import { BRAND_KEYS, VISION_QUESTION_LABELS, applicantMock } from "@/lib/applicants";
+import { PROFILE_ANSWER_KEYS as K, VISION_QUESTION_LABELS, applicantMock } from "@/lib/applicants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,13 +172,17 @@ export function ApplicantsPanel() {
         {visible.map((a) => {
           const status = (STATUSES.includes(a.status as Status) ? a.status : "new") as Status;
           const open = openId === a.id;
-          // Brand answers ride in vision_answers (see lib/applicants.ts), so
-          // split them out and leave only real vision answers for that section.
+          // Content, audience and brand answers ride in vision_answers (see
+          // lib/applicants.ts), so split them out and leave only real vision
+          // answers for that section.
           const answers = a.vision_answers ?? {};
-          const brandsWorked = answers[BRAND_KEYS.worked];
-          const brands = answers[BRAND_KEYS.details];
+          const contentTypes = answers[K.contentTypes];
+          const audience = answers[K.audience];
+          const brandsWorked = answers[K.brandsWorked];
+          const brands = answers[K.brands];
+          const profileKeys: string[] = Object.values(K);
           const visionEntries = Object.entries(answers).filter(
-            ([k]) => k !== BRAND_KEYS.worked && k !== BRAND_KEYS.details,
+            ([k]) => !profileKeys.includes(k),
           );
           return (
             <div
@@ -279,6 +283,23 @@ export function ApplicantsPanel() {
                           </a>
                         ))}
                       </div>
+                    </Section>
+                  )}
+
+                  {(contentTypes || audience) && (
+                    <Section title="Content & audience">
+                      {contentTypes && (
+                        <div className="flex flex-wrap gap-1">
+                          {contentTypes.split(", ").map((c) => (
+                            <Badge key={c} variant="outline">{c}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      {audience && (
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                          {audience}
+                        </p>
+                      )}
                     </Section>
                   )}
 

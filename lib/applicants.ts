@@ -13,12 +13,15 @@ export const VISION_QUESTION_LABELS: Record<string, string> = {
   twelve_months: "Where do you want to be in 12 months, and how does this fit?",
 };
 
-// The website stores the brand question in vision_answers under these keys
+// The website stores the content, audience and brand questions in
+// vision_answers under these keys
 // (the vision step itself was cut in Oct 2026, which left that column free and
 // avoided a schema change). Must match budgetiq/app/api/content-onboarding.
-export const BRAND_KEYS = {
-  worked: "brands_worked_with",
-  details: "brands",
+export const PROFILE_ANSWER_KEYS = {
+  contentTypes: "content_types",
+  audience: "audience",
+  brandsWorked: "brands_worked_with",
+  brands: "brands",
 } as const;
 
 // Seeds so the panel is reviewable before Supabase is connected — same role as
@@ -43,6 +46,8 @@ export const applicantMock: Applicant[] = [
     tools: [],
     portfolio_url: null,
     vision_answers: {
+      content_types: "Money & finance, Student life",
+      audience: "Uni students in Lebanon, 18 to 24, into budgeting and side hustles",
       brands_worked_with: "Yes",
       brands: "Anghami, 3 TikToks, 2023",
     },
