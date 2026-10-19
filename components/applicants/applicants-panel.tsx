@@ -17,7 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useCrud, type CrudRow } from "@/lib/use-crud";
 import { formatNumber, relativeTime } from "@/lib/format";
-import { VISION_QUESTION_LABELS, applicantMock } from "@/lib/applicants";
+import { PROFILE_ANSWER_KEYS as K, VISION_QUESTION_LABELS, applicantMock } from "@/lib/applicants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,6 +172,18 @@ export function ApplicantsPanel() {
         {visible.map((a) => {
           const status = (STATUSES.includes(a.status as Status) ? a.status : "new") as Status;
           const open = openId === a.id;
+          // Content, audience and brand answers ride in vision_answers (see
+          // lib/applicants.ts), so split them out and leave only real vision
+          // answers for that section.
+          const answers = a.vision_answers ?? {};
+          const contentTypes = answers[K.contentTypes];
+          const audience = answers[K.audience];
+          const brandsWorked = answers[K.brandsWorked];
+          const brands = answers[K.brands];
+          const profileKeys: string[] = Object.values(K);
+          const visionEntries = Object.entries(answers).filter(
+            ([k]) => !profileKeys.includes(k),
+          );
           return (
             <div
               key={a.id}
@@ -189,6 +201,7 @@ export function ApplicantsPanel() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm font-medium">{a.full_name}</span>
                     <Badge variant={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>
+                    {brandsWorked === "Yes" && <Badge variant="outline">Brand work</Badge>}
                     {a.hunger != null && (
                       <span className="inline-flex items-center gap-1 font-mono text-[10px] text-muted-foreground">
                         <Flame className="h-3 w-3 text-primary" />
@@ -236,8 +249,9 @@ export function ApplicantsPanel() {
                     <Detail icon={Mail} label="Email" value={a.email} />
                     <Detail icon={Phone} label="Phone" value={a.phone} />
                     <Detail label="Age" value={a.age} />
-                    <Detail label="Studies / work" value={a.occupation} />
-                    <Detail label="Time commitment" value={a.commitment} />
+                    {/* No longer asked on /onboarding. Shown for older applicants only. */}
+                    {a.occupation && <Detail label="Studies / work" value={a.occupation} />}
+                    {a.commitment && <Detail label="Time commitment" value={a.commitment} />}
                     <Detail
                       label="Signed"
                       value={
@@ -272,6 +286,36 @@ export function ApplicantsPanel() {
                     </Section>
                   )}
 
+                  {(contentTypes || audience) && (
+                    <Section title="Content & audience">
+                      {contentTypes && (
+                        <div className="flex flex-wrap gap-1">
+                          {contentTypes.split(", ").map((c) => (
+                            <Badge key={c} variant="outline">{c}</Badge>
+                          ))}
+                        </div>
+                      )}
+                      {audience && (
+                        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                          {audience}
+                        </p>
+                      )}
+                    </Section>
+                  )}
+
+                  {brandsWorked && (
+                    <Section title="Brands they've worked with">
+                      <p className="text-sm">
+                        {brandsWorked === "Yes" ? "Yes" : "No brand work yet"}
+                      </p>
+                      {brands && (
+                        <p className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+                          {brands}
+                        </p>
+                      )}
+                    </Section>
+                  )}
+
                   {/* Links */}
                   {(a.portfolio_url || a.best_post_url) && (
                     <Section title="Links">
@@ -300,10 +344,11 @@ export function ApplicantsPanel() {
                     </Section>
                   )}
 
-                  {/* The answers that actually decide it */}
+                  {/* Only applicants from before the vision step was cut have these. */}
+                  {visionEntries.length > 0 && (
                   <Section title="Vision answers">
                     <div className="space-y-4">
-                      {Object.entries(a.vision_answers ?? {}).map(([qid, answer]) => (
+                      {visionEntries.map(([qid, answer]) => (
                         <div key={qid} className="rounded-md border border-border bg-card/50 p-3">
                           <p className="mb-1.5 text-xs font-medium text-foreground">
                             {VISION_QUESTION_LABELS[qid] ?? qid}
@@ -313,11 +358,9 @@ export function ApplicantsPanel() {
                           </p>
                         </div>
                       ))}
-                      {Object.keys(a.vision_answers ?? {}).length === 0 && (
-                        <p className="text-sm text-muted-foreground">No answers recorded.</p>
-                      )}
                     </div>
                   </Section>
+                  )}
 
                   {/* Review actions */}
                   <Section title="Review">
