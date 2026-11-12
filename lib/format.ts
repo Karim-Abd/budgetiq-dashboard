@@ -59,7 +59,13 @@ export function formatDate(input: string | Date): string {
 export function formatShortDate(input: string | Date): string {
   const d = toCalendarDate(input);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  // The year only appears when it isn't this one — an expiry two years out
+  // must not read the same as one next month.
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: d.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
+  });
 }
 
 /**

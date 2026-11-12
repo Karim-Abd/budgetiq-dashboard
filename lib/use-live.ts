@@ -6,12 +6,13 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
 // The tables the OS reads. The first two are written by the public website
 // and reviewed here (support tickets, content-team applications); the
-// finance pair is entered by the team in the OS itself.
+// finance pair and partnerships are entered by the team in the OS itself.
 export const LIVE_TABLES = [
   "support_tickets",
   "content_onboarding",
   "finance_transactions",
   "finance_subscriptions",
+  "partnerships",
 ] as const;
 
 export type LiveTable = (typeof LIVE_TABLES)[number];

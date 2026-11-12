@@ -141,3 +141,29 @@ export const financeSubscriptionsEntity: EntityConfig = {
     { id: "sub4", name: "Figma", vendor: "Figma", amount: 15, cycle: "monthly", category: "software", status: "paused", next_charge: null, notes: "Paused after rebrand" },
   ],
 };
+
+// ---------------------------------------------------------------------------
+// PARTNERSHIPS
+// ---------------------------------------------------------------------------
+
+export const partnershipsEntity: EntityConfig = {
+  table: "partnerships",
+  title: "Partnerships",
+  singular: "partnership",
+  orderBy: "signed_on",
+  description: "every deal signed, newest first",
+  migration: "supabase/partnerships.sql",
+  fields: [
+    { key: "name", label: "Partner", type: "text", required: true, placeholder: "Acme Bank" },
+    { key: "type", label: "Type", type: "select", options: ["brand", "creator", "affiliate", "sponsorship", "university", "other"], optionLabels: { brand: "Brand", creator: "Creator", affiliate: "Affiliate", sponsorship: "Sponsorship", university: "University", other: "Other" }, badgeMap: { brand: "info", creator: "growth", affiliate: "secondary", sponsorship: "info", university: "secondary", other: "muted" } },
+    { key: "contact", label: "Contact", type: "text", placeholder: "jordan@acme.com" },
+    { key: "signed_on", label: "Signed", type: "date", required: true, defaultValue: todayInputValue },
+    // Left blank for an open-ended deal.
+    { key: "expires_on", label: "Expires", type: "date" },
+    { key: "details", label: "What's involved", type: "textarea", placeholder: "3 sponsored TikToks a month, 20% off Pro for their audience" },
+  ],
+  mock: [
+    { id: "pt1", name: "Northwind Credit Union", type: "brand", contact: "partners@northwind.com", signed_on: "2026-09-15", expires_on: "2027-09-15", details: "Co-branded budgeting challenge; they cover prize money" },
+    { id: "pt2", name: "Lena Ortiz", type: "creator", contact: "lena@ortiz.studio", signed_on: "2026-08-01", expires_on: "2026-12-01", details: "4 videos over 4 months, affiliate code LENA20" },
+  ],
+};

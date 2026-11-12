@@ -84,6 +84,8 @@ export interface EntityConfig<T extends CrudRow = CrudRow> {
    * created here. Income and Expenses are two views of finance_transactions.
    */
   filter?: Record<string, string>;
+  /** SQL file that creates `table`, named when it doesn't exist yet */
+  migration?: string;
   mock?: T[];
 }
 
@@ -354,7 +356,7 @@ export function CrudTable<T extends CrudRow>({
                     <span className="inline-flex items-center gap-2">
                       <TableProperties className="h-4 w-4" />
                       Table <code className="font-mono text-xs">{config.table}</code> doesn&apos;t exist yet. Run{" "}
-                      <code className="font-mono text-xs">supabase/finance.sql</code> to create it.
+                      <code className="font-mono text-xs">{config.migration ?? "supabase/finance.sql"}</code> to create it.
                     </span>
                   ) : (
                     <>No {config.singular}s yet — add your first one.</>

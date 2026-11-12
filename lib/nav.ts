@@ -2,6 +2,7 @@ import {
   LifeBuoy,
   ClipboardList,
   Wallet,
+  Handshake,
   type LucideIcon,
 } from "lucide-react";
 
@@ -15,7 +16,8 @@ export interface NavItem {
 }
 
 // Support and Onboarding Answers are each backed by one table the public
-// website writes into; Finance is the exception — the team enters it here.
+// website writes into; Finance and Partnerships are the exception — the team
+// enters them here.
 export const navItems: NavItem[] = [
   {
     label: "Customer Support",
@@ -36,6 +38,13 @@ export const navItems: NavItem[] = [
     href: "/finance",
     icon: Wallet,
     description: "Income, expenses, subscriptions",
+    accent: "growth",
+  },
+  {
+    label: "Partnerships",
+    href: "/partnerships",
+    icon: Handshake,
+    description: "Deals signed and when they expire",
     accent: "growth",
   },
 ];
