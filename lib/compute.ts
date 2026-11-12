@@ -133,3 +133,45 @@ export function financeStats(data: LiveData) {
     count: tx.length,
   };
 }
+
+// ---------------------------------------------------------------------------
+// PARTNERSHIPS
+// ---------------------------------------------------------------------------
+const EXPIRING_WINDOW_DAYS = 30;
+
+/** YYYY-MM-DD `days` from today, in local time to match `currentDay()`. */
+function dayOffset(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return currentDay(d);
+}
+
+export function partnershipStats(data: LiveData) {
+  const rows = data.partnerships;
+  const today = currentDay();
+  const horizon = dayOffset(EXPIRING_WINDOW_DAYS);
+
+  // Same plain-string date comparison as financeStats. A blank expiry is an
+  // open-ended deal, so it counts as active and never as expiring.
+  const expiryOf = (r: Record<string, unknown>) => {
+    const d = String(r.expires_on ?? "");
+    return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+  };
+  const expired = rows.filter((r) => {
+    const d = expiryOf(r);
+    return d !== null && d < today;
+  });
+  const upcoming = rows
+    .map(expiryOf)
+    .filter((d): d is string => d !== null && d >= today)
+    .sort();
+
+  return {
+    total: rows.length,
+    active: rows.length - expired.length,
+    expired: expired.length,
+    expiringSoon: upcoming.filter((d) => d <= horizon).length,
+    nextExpiry: upcoming[0] ?? null,
+    windowDays: EXPIRING_WINDOW_DAYS,
+  };
+}

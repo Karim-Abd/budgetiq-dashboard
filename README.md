@@ -35,8 +35,10 @@ do the 3-step Supabase setup below.
    - [`supabase/schema.sql`](supabase/schema.sql) — the `set_updated_at` helper, `profiles`, RLS, and the new-user trigger. Must run first.
    - [`supabase/support_tickets.sql`](supabase/support_tickets.sql)
    - [`supabase/content_onboarding.sql`](supabase/content_onboarding.sql)
+   - [`supabase/finance.sql`](supabase/finance.sql)
+   - [`supabase/partnerships.sql`](supabase/partnerships.sql)
 
-   All three are idempotent, so re-running them is safe.
+   All of them are idempotent, so re-running them is safe.
 
    [`supabase/waitlist.sql`](supabase/waitlist.sql) is kept for the website's
    Join the Waitlist popup, which still writes to the `waitlist` table. The OS
@@ -75,6 +77,8 @@ with a toast.
 | `/` | Redirects to `/support` |
 | `/support` | Customer Support — ticket queue with status and priority |
 | `/applicants` | Onboarding Answers — expandable applications with the long-form answers |
+| `/finance` | Finance — income, expenses, and subscriptions |
+| `/partnerships` | Partnerships — deals signed, what they involve, and when they expire |
 | `/settings/team` | Team accounts (owner/admin only) |
 | `/login`, `/setup` | Sign in, and first-owner creation |
 
